@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "DMSans";
+  src: url("/fonts/DMSans_24pt-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "DMSans_Bold";
+  src: url("/fonts/DMSans_18pt-Bold.ttf");
+}
+
+@font-face {
+  font-family: "DMSans_Regular";
+  src: url("/fonts/DMSans_36pt-Regular.ttf");
+}
