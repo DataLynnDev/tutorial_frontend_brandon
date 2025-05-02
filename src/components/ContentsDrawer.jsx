@@ -355,10 +355,6 @@ const ContentsDrawer = ({
                                     >
                                       <ListItemButton
                                         className="w-full" // Disables lessons beyond the first two
-                                        style={{
-                                          width: 260,
-                                          marginRight: "auto",
-                                        }}
                                         disabled={isDisabled}
                                         onClick={() => {
                                           setSelectedLessonId(lesson.id);

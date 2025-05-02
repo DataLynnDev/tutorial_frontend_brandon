@@ -215,7 +215,7 @@ const MyCourses = () => {
                               >
                                 Expires in{" "}
                                 {months >= 1
-                                  ? `${months}M`
+                                  ? `${months}Mo`
                                   : days >= 1
                                   ? `${days}d`
                                   : hours >= 1
