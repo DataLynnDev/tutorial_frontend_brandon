@@ -246,7 +246,14 @@ const Lesson = () => {
       <div className="flex flex-col w-full">
         <div>
           {isMobileScreen && (
-            <div className="flex h-10 justify-end items-center gap-4 flex-1">
+            <div className="flex mb-4 px-2 justify-between items-center">
+              <Typography
+                style={{ fontFamily: "DMSans" }}
+                className="text-textPrimary pl-4"
+                variant="body1"
+              >
+                Chapter {chapterNum}: {chapter.name}
+              </Typography>
               <ContentsDrawer
                 isMobileScreen={isMobileScreen}
                 chapters={chapters}
@@ -290,17 +297,12 @@ const Lesson = () => {
         )}
         {!isMobileScreen && (
           <div style={{ width: "100%" }} className="flex">
-            {/* <div style={{ width: "50%", backgroundColor: "yellow" }}>
-              <p>jkdjfl</p>
-            </div>
-            <div style={{ width: "50%", backgroundColor: "yellowgreen" }}>
-              <p>50%</p>
-            </div> */}
             <Description
               lesson={lesson}
               complete={complete}
               user={user}
               handleEnd={handleEnd}
+              isMobileScreen={isMobileScreen}
               video={video}
               setVideo={setVideo}
               handleFileChange={handleFileChange}
@@ -309,27 +311,17 @@ const Lesson = () => {
               videoRef={videoRef}
               handleLoadedMetadata={handleLoadedMetadata}
             />
-            <Code lesson={lesson} user={user} />
+            <Code isMobileScreen={isMobileScreen} lesson={lesson} user={user} />
           </div>
         )}
         {isMobileScreen && (
-          <Split
-            className="LessonBody h-[calc(100vh-64px)] flex flex-col"
-            sizes={[50, 50]}
-            minSize={100}
-            direction={"vertical"}
-            cursor="row-resize"
-            expandToMin={false}
-            gutterSize={12}
-            gutterAlign="center"
-            snapOffset={30}
-            dragInterval={1}
-          >
+          <div className="flex flex-col">
             <Description
               lesson={lesson}
               complete={complete}
               user={user}
               handleEnd={handleEnd}
+              isMobileScreen={isMobileScreen}
               video={video}
               setVideo={setVideo}
               handleFileChange={handleFileChange}
@@ -338,8 +330,8 @@ const Lesson = () => {
               videoRef={videoRef}
               handleLoadedMetadata={handleLoadedMetadata}
             />
-            <Code lesson={lesson} user={user} />
-          </Split>
+            <Code isMobileScreen={isMobileScreen} lesson={lesson} user={user} />
+          </div>
         )}
       </div>
     </div>

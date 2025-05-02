@@ -260,7 +260,9 @@ const ContentsDrawer = ({
           }}
         >
           <Box
-            sx={{ width: isMobileScreen ? "auto" : "100%" }}
+            sx={{
+              width: isMobileScreen ? "auto" : "100%",
+            }}
             role="presentation"
           >
             <div className="flex py-2 px-4 items-center gap-4 self-stretch">
@@ -282,393 +284,404 @@ const ContentsDrawer = ({
             <Divider />
             <List
               sx={{
-                width: "310px",
-                bgcolor: "background.paper",
+                width: isMobileScreen ? "100%" : "310px",
+                // bgcolor: "background.paper",
+                // backgroundColor: "blue",
                 paddingY: "16px",
                 gap: "4px",
               }}
               component="nav"
             >
-              {chap?.map((chapter, indexChapter) => (
-                <div key={indexChapter}>
-                  <ListItemButton
-                    className="flex py-[12px] items-center" // Ensure this is flex
-                    onClick={() => toggleSubStatus(indexChapter)}
-                    sx={{ display: "flex", justifyContent: "space-between" }} // Flex with justifyContent
-                  >
-                    <Typography
-                      className="text-textPrimary text-base not-italic font-normal tracking-[0.15px]"
-                      style={{ fontFamily: "DMSans, sans-serif" }}
-                      variant="body1"
+              {chap
+                ?.sort((a, b) => a.id - b.id)
+                .map((chapter, indexChapter) => (
+                  <div key={indexChapter}>
+                    <ListItemButton
+                      className="flex py-[12px] items-center" // Ensure this is flex
+                      onClick={() => toggleSubStatus(indexChapter)}
+                      sx={{ display: "flex", justifyContent: "space-between" }} // Flex with justifyContent
                     >
-                      {`${indexChapter + 1}. ${chapter?.name}`}
-                    </Typography>
-                    {subStatus[indexChapter] ? (
-                      <ExpandMore color="action" />
-                    ) : (
-                      <ChevronRight color="action" />
-                    )}
-                  </ListItemButton>
-
-                  <Collapse
-                    in={subStatus[indexChapter]}
-                    timeout="auto"
-                    unmountOnExit
-                  >
-                    <List component="div" disablePadding>
-                      {chapter.lessons.length > 0 ? (
-                        chapter.lessons.map((lesson, index) => {
-                          if (Array.isArray(completed)) {
-                            const progress =
-                              completed.find(
-                                (item) => item.lesson_id === lesson.id
-                              ) || null;
-
-                            const lessonIndex = allLessons.findIndex(
-                              (l) => l.id === lesson.id
-                            );
-                            const isDisabled =
-                              user.role !== "admin" &&
-                              localDetail?.saved === false &&
-                              lessonIndex >= 2;
-
-                            return (
-                              <div className="flex" key={index}>
-                                <ListItem
-                                  key={`lesson-${lesson.id}`}
-                                  disablePadding
-                                  className={`flex flex-col ${
-                                    isDisabled ? "cursor-not-allowed" : ""
-                                  }`}
-                                  sx={{
-                                    "&:not(:last-child)": {
-                                      mb: "6px",
-                                    },
-                                  }}
-                                >
-                                  <ListItemButton
-                                    className="w-full" // Disables lessons beyond the first two
-                                    style={{
-                                      width: 260,
-                                      marginRight: "auto",
-                                    }}
-                                    disabled={isDisabled}
-                                    onClick={() => {
-                                      setSelectedLessonId(lesson.id);
-                                      !isDisabled &&
-                                        navigate(`/lesson/${lesson.id}`, {
-                                          state: {
-                                            lesson,
-                                            chapters,
-                                            tutorial,
-                                            user,
-                                            chapter,
-                                            localDetail,
-                                            chapterindex: indexChapter,
-                                            chaptersAlt,
-                                          },
-                                        });
-                                      // setTimeout(() => {
-                                      //   window.location.reload();
-                                      // }, 0);
-                                    }}
-                                  >
-                                    {user.role === "admin" ? (
-                                      ""
-                                    ) : lesson.id === selectedLessonId ? (
-                                      <GraphicEq color="info" />
-                                    ) : (
-                                      !isDisabled &&
-                                      (progress ? (
-                                        <CheckCircle color="success" />
-                                      ) : (
-                                        <PlayCircleOutline color="action" />
-                                      ))
-                                    )}
-
-                                    <Typography
-                                      style={{
-                                        fontFamily: "DMSans, sans-serif",
-                                        marginLeft: 13,
-                                      }}
-                                    >
-                                      {lesson.title}
-                                    </Typography>
-                                  </ListItemButton>
-                                </ListItem>
-                                <div className="flex mb-[6px]">
-                                  {isDisabled && (
-                                    <>
-                                      {localDetail?.saved === false ? (
-                                        tutorial.subscribe === "one_time" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Purchase Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  saveTutorial(tutorial.id);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : tutorial.subscribe === "monthly" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Subscribe Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeTutorial(
-                                                    tutorial.id
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : tutorial.subscribe === "yearly" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Subscribe Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeYearlyTutorial(
-                                                    tutorial.id
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : (
-                                          ""
-                                        )
-                                      ) : (
-                                        ""
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          } else {
-                            const lessonIndex = allLessons.findIndex(
-                              (l) => l.id === lesson.id
-                            );
-                            const isDisabled =
-                              user.role !== "admin" &&
-                              localDetail.saved === false &&
-                              lessonIndex >= 2;
-
-                            return (
-                              <div className="flex" key={index}>
-                                <ListItem
-                                  key={`lesson-${lesson.id}`}
-                                  disablePadding
-                                  className={`flex flex-col ${
-                                    isDisabled ? "cursor-not-allowed" : ""
-                                  }`}
-                                  sx={{
-                                    "&:not(:last-child)": {
-                                      mb: "6px",
-                                    },
-                                  }}
-                                >
-                                  <ListItemButton
-                                    className="w-full"
-                                    // Disables lessons beyond the first two
-                                    disabled={isDisabled}
-                                    onClick={() => {
-                                      setSelectedLessonId(lesson.id);
-                                      !isDisabled &&
-                                        navigate(`/lesson/${lesson.id}`, {
-                                          state: {
-                                            lesson,
-                                            chapters,
-                                            tutorial,
-                                            user,
-                                            chapter,
-                                            localDetail,
-                                            chapterindex: indexChapter,
-                                            chaptersAlt,
-                                          },
-                                        });
-                                    }}
-                                  >
-                                    {user.role === "admin" ? (
-                                      ""
-                                    ) : lesson.id === selectedLessonId ? (
-                                      <GraphicEq color="info" />
-                                    ) : (
-                                      !isDisabled &&
-                                      (lesson.completed ? (
-                                        <CheckCircle color="success" />
-                                      ) : (
-                                        <PlayCircleOutline color="action" />
-                                      ))
-                                    )}
-
-                                    <Typography
-                                      style={{
-                                        fontFamily: "DMSans, sans-serif",
-                                        marginLeft: 13,
-                                      }}
-                                    >
-                                      {lesson.title}
-                                    </Typography>
-                                  </ListItemButton>
-                                </ListItem>
-                                <div className="flex mb-[6px]">
-                                  {isDisabled && (
-                                    <>
-                                      {localDetail?.saved === false ? (
-                                        tutorial.subscribe === "one_time" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Purchase Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  saveTutorial(tutorial.id);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : tutorial.subscribe === "monthly" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Subscribe Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeTutorial(
-                                                    tutorial.id
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : tutorial.subscribe === "yearly" ? (
-                                          <div className="flex pr-5">
-                                            <Tooltip
-                                              title="Subscribe Tutorial"
-                                              arrow
-                                              PopperProps={{
-                                                modifiers: [
-                                                  {
-                                                    name: "offset",
-                                                    options: {
-                                                      offset: [0, -17],
-                                                    },
-                                                  },
-                                                ],
-                                              }}
-                                            >
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeYearlyTutorial(
-                                                    tutorial.id
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                            </Tooltip>
-                                          </div>
-                                        ) : (
-                                          ""
-                                        )
-                                      ) : (
-                                        ""
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          }
-                        })
+                      <Typography
+                        className="text-textPrimary text-base not-italic font-normal tracking-[0.15px]"
+                        style={{ fontFamily: "DMSans, sans-serif" }}
+                        variant="body1"
+                      >
+                        {`${indexChapter + 1}. ${chapter?.name}`}
+                      </Typography>
+                      {subStatus[indexChapter] ? (
+                        <ExpandMore color="action" />
                       ) : (
-                        <ListItem disablePadding>
-                          <ListItemButton>
-                            <ListItemIcon>
-                              <PlayCircleOutline
-                                style={{ color: "#0000008F" }}
-                              />
-                            </ListItemIcon>
-                            <Typography
-                              style={{
-                                fontFamily: "DMSans, sans-serif",
-                              }}
-                            >
-                              Coming Soon...
-                            </Typography>
-                          </ListItemButton>
-                        </ListItem>
+                        <ChevronRight color="action" />
                       )}
-                    </List>
-                  </Collapse>
-                </div>
-              ))}
+                    </ListItemButton>
+
+                    <Collapse
+                      in={subStatus[indexChapter]}
+                      timeout="auto"
+                      unmountOnExit
+                    >
+                      <List component="div" disablePadding>
+                        {chapter.lessons.length > 0 ? (
+                          chapter.lessons
+                            .sort((a, b) => a.id - b.id)
+                            .map((lesson, index) => {
+                              if (Array.isArray(completed)) {
+                                const progress =
+                                  completed.find(
+                                    (item) => item.lesson_id === lesson.id
+                                  ) || null;
+
+                                const lessonIndex = allLessons
+                                  .sort((a, b) => a.id - b.id)
+                                  .findIndex((l) => l.id === lesson.id);
+                                const isDisabled =
+                                  user.role !== "admin" &&
+                                  localDetail?.saved === false &&
+                                  lessonIndex >= 2;
+
+                                return (
+                                  <div className="flex" key={index}>
+                                    <ListItem
+                                      key={`lesson-${lesson.id}`}
+                                      disablePadding
+                                      className={`flex flex-col ${
+                                        isDisabled ? "cursor-not-allowed" : ""
+                                      }`}
+                                      sx={{
+                                        "&:not(:last-child)": {
+                                          mb: "6px",
+                                        },
+                                      }}
+                                    >
+                                      <ListItemButton
+                                        className="w-full" // Disables lessons beyond the first two
+                                        style={{
+                                          width: 260,
+                                          marginRight: "auto",
+                                        }}
+                                        disabled={isDisabled}
+                                        onClick={() => {
+                                          setSelectedLessonId(lesson.id);
+                                          !isDisabled &&
+                                            navigate(`/lesson/${lesson.id}`, {
+                                              state: {
+                                                lesson,
+                                                chapters,
+                                                tutorial,
+                                                user,
+                                                chapter,
+                                                localDetail,
+                                                chapterindex: indexChapter,
+                                                chaptersAlt,
+                                              },
+                                            });
+                                          // setTimeout(() => {
+                                          //   window.location.reload();
+                                          // }, 0);
+                                        }}
+                                      >
+                                        {user.role === "admin" ? (
+                                          ""
+                                        ) : lesson.id === selectedLessonId ? (
+                                          <GraphicEq color="info" />
+                                        ) : (
+                                          !isDisabled &&
+                                          (progress ? (
+                                            <CheckCircle color="success" />
+                                          ) : (
+                                            <PlayCircleOutline color="action" />
+                                          ))
+                                        )}
+
+                                        <Typography
+                                          style={{
+                                            fontFamily: "DMSans, sans-serif",
+                                            marginLeft: 13,
+                                          }}
+                                        >
+                                          {lesson.title}
+                                        </Typography>
+                                      </ListItemButton>
+                                    </ListItem>
+                                    <div className="flex mb-[6px]">
+                                      {isDisabled && (
+                                        <>
+                                          {localDetail?.saved === false ? (
+                                            tutorial.subscribe ===
+                                            "one_time" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Purchase Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      saveTutorial(tutorial.id);
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : tutorial.subscribe ===
+                                              "monthly" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Subscribe Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeTutorial(
+                                                        tutorial.id
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : tutorial.subscribe ===
+                                              "yearly" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Subscribe Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeYearlyTutorial(
+                                                        tutorial.id
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : (
+                                              ""
+                                            )
+                                          ) : (
+                                            ""
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                const lessonIndex = allLessons.findIndex(
+                                  (l) => l.id === lesson.id
+                                );
+                                const isDisabled =
+                                  user.role !== "admin" &&
+                                  localDetail.saved === false &&
+                                  lessonIndex >= 2;
+
+                                return (
+                                  <div className="flex" key={index}>
+                                    <ListItem
+                                      key={`lesson-${lesson.id}`}
+                                      disablePadding
+                                      className={`flex flex-col ${
+                                        isDisabled ? "cursor-not-allowed" : ""
+                                      }`}
+                                      sx={{
+                                        "&:not(:last-child)": {
+                                          mb: "6px",
+                                        },
+                                      }}
+                                    >
+                                      <ListItemButton
+                                        className="w-full"
+                                        // Disables lessons beyond the first two
+                                        disabled={isDisabled}
+                                        onClick={() => {
+                                          setSelectedLessonId(lesson.id);
+                                          !isDisabled &&
+                                            navigate(`/lesson/${lesson.id}`, {
+                                              state: {
+                                                lesson,
+                                                chapters,
+                                                tutorial,
+                                                user,
+                                                chapter,
+                                                localDetail,
+                                                chapterindex: indexChapter,
+                                                chaptersAlt,
+                                              },
+                                            });
+                                        }}
+                                      >
+                                        {user.role === "admin" ? (
+                                          ""
+                                        ) : lesson.id === selectedLessonId ? (
+                                          <GraphicEq color="info" />
+                                        ) : (
+                                          !isDisabled &&
+                                          (lesson.completed ? (
+                                            <CheckCircle color="success" />
+                                          ) : (
+                                            <PlayCircleOutline color="action" />
+                                          ))
+                                        )}
+
+                                        <Typography
+                                          style={{
+                                            fontFamily: "DMSans, sans-serif",
+                                            marginLeft: 13,
+                                          }}
+                                        >
+                                          {lesson.title}
+                                        </Typography>
+                                      </ListItemButton>
+                                    </ListItem>
+                                    <div className="flex mb-[6px]">
+                                      {isDisabled && (
+                                        <>
+                                          {localDetail?.saved === false ? (
+                                            tutorial.subscribe ===
+                                            "one_time" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Purchase Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      saveTutorial(tutorial.id);
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : tutorial.subscribe ===
+                                              "monthly" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Subscribe Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeTutorial(
+                                                        tutorial.id
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : tutorial.subscribe ===
+                                              "yearly" ? (
+                                              <div className="flex pr-5">
+                                                <Tooltip
+                                                  title="Subscribe Tutorial"
+                                                  arrow
+                                                  PopperProps={{
+                                                    modifiers: [
+                                                      {
+                                                        name: "offset",
+                                                        options: {
+                                                          offset: [0, -17],
+                                                        },
+                                                      },
+                                                    ],
+                                                  }}
+                                                >
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeYearlyTutorial(
+                                                        tutorial.id
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                </Tooltip>
+                                              </div>
+                                            ) : (
+                                              ""
+                                            )
+                                          ) : (
+                                            ""
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })
+                        ) : (
+                          <ListItem disablePadding>
+                            <ListItemButton>
+                              <ListItemIcon>
+                                <PlayCircleOutline
+                                  style={{ color: "#0000008F" }}
+                                />
+                              </ListItemIcon>
+                              <Typography
+                                style={{
+                                  fontFamily: "DMSans, sans-serif",
+                                }}
+                              >
+                                Coming Soon...
+                              </Typography>
+                            </ListItemButton>
+                          </ListItem>
+                        )}
+                      </List>
+                    </Collapse>
+                  </div>
+                ))}
             </List>
           </Box>
         </Drawer>

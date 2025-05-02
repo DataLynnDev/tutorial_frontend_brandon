@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { Typography } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { Button, Typography } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import LessonCard from "../components/LessonCard";
 import countIcon from "../assets/countIcon.svg";
@@ -14,6 +14,7 @@ const MyCourses = () => {
   const [tutorials, setTutorials] = useState([]);
 
   const [zaved, setZaved] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,6 +58,62 @@ const MyCourses = () => {
   // zaved.map((inor, index) => {
   //   console.log(tutorials.find((item) => item.id === inor));
   // });
+
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+
+  const unsave = async (userId, tutorialId) => {
+    const userConfirmed = window.confirm("Are you going to unsave?");
+    if (!userConfirmed) {
+      setSelectedId("");
+      return; // Stop execution if the user cancels
+    } else {
+      alert("Tutorial unsaved successfully");
+    }
+    try {
+      // setTonext(true); ?
+      if (!userId || !tutorialId) {
+        console.warn("Missing user ID or tutorial ID");
+        return;
+      }
+
+      // Send DELETE request to backend
+      const response = await axios.delete(
+        `http://localhost:8000/delete_saved_tutorial/${userId}/${tutorialId}`,
+        { withCredentials: true } // Ensure cookies/session are sent
+      );
+
+      // Check if request was successful
+      if (response.status === 200) {
+        setZaved((prev) => {
+          const updated = prev.filter(
+            (inor) => inor.tutorial_id !== tutorialId
+          );
+          if (updated.length === 0) {
+            setShouldNavigate(true);
+          }
+          return updated;
+        });
+      } else {
+        console.warn("Unexpected response status:", response.status);
+      }
+    } catch (err) {
+      console.error(
+        "Error deleting saved tutorial:",
+        err.response?.data || err.message
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (shouldNavigate) {
+      navigate("/"); // ✅ safely navigate
+    }
+  }, [shouldNavigate, navigate]);
+
+  const [selectedId, setSelectedId] = useState("");
+  const handleSelectedId = (id) => {
+    setSelectedId(id);
+  };
   return (
     <div>
       <Header />
@@ -132,7 +189,7 @@ const MyCourses = () => {
                     return (
                       <div
                         key={index}
-                        className="w-full h-full flex flex-col gap-1"
+                        className="w-full h-full flex flex-col gap-1 group"
                       >
                         <LessonCard data={element} user={user} />
 
@@ -180,6 +237,28 @@ const MyCourses = () => {
                                 subscribed
                               </Typography>
                             )}
+                          </div>
+                          <div
+                            className={`hidden ${
+                              inor.tutorial_id !== selectedId &&
+                              "group-hover:flex"
+                            }`}
+                          >
+                            <Button
+                              sx={{
+                                backgroundColor: "#F6FAFD",
+                                display: "flex",
+                                marginLeft: "auto",
+                                marginRight: "auto",
+                                marginTop: "15px",
+                              }}
+                              onClick={() => {
+                                handleSelectedId(inor.tutorial_id);
+                                unsave(user.id, inor.tutorial_id);
+                              }}
+                            >
+                              remove subscription
+                            </Button>
                           </div>
                         </div>
                       </div>

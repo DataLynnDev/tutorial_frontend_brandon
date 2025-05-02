@@ -99,6 +99,16 @@ const Main = () => {
   const handleSelectedId = (id) => setSelectedId(id);
 
   const updatePrice = async (tutorial_id) => {
+    if (nprice === "" || nprice === null || nprice === undefined) {
+      setSnack({
+        open: true,
+        message:
+          "No price entered. Only subscription will be updated if selected.",
+        severity: "info",
+      });
+      return;
+    }
+
     try {
       const response = await axios.put(
         `http://localhost:8000/v1/api/tutorial/${tutorial_id}/price`,
@@ -140,27 +150,44 @@ const Main = () => {
   };
 
   const [nSubscribe, setNSubscribe] = useState("");
-
   const handleNSubscribe = (value) => {
     setNSubscribe(value);
   };
 
   const updateSubscription = async (tutorial_id) => {
-    const response = await axios.put(
-      `http://localhost:8000/v1/api/tutorial/${tutorial_id}/subscribe`,
-      {
-        subscribe: nSubscribe,
-      },
-      { withCredentials: true }
-    );
-    if (response.status === 200) {
-      setTutorials((prevTutorials) =>
-        prevTutorials.map((tutorial) =>
-          tutorial.id === tutorial_id
-            ? { ...tutorial, subscribe: response.data.subscribe }
-            : tutorial
-        )
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/v1/api/tutorial/${tutorial_id}/subscribe`,
+        {
+          subscribe: nSubscribe,
+        },
+        { withCredentials: true }
       );
+
+      if (response.status === 200) {
+        setTutorials((prevTutorials) =>
+          prevTutorials.map((tutorial) =>
+            tutorial.id === tutorial_id
+              ? { ...tutorial, subscribe: response.data.subscribe }
+              : tutorial
+          )
+        );
+        setSnack({
+          open: true,
+          message: "Subscription updated successfully!",
+          severity: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+      setSnack({
+        open: true,
+        message: "Failed to update the subscription.",
+        severity: "error",
+      });
+    } finally {
+      setSelectedId("");
+      setNSubscribe("");
     }
   };
 
@@ -184,7 +211,8 @@ const Main = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [selectedId, updatePrice, updateSubscription]);
+  }, [selectedId]);
+  console.log(tutorials);
   return (
     <div>
       <Header user={user} />
@@ -268,29 +296,40 @@ const Main = () => {
                         </div>
                       </div>
                     </div>
-                    {user.role === "admin" ? (
+                    {user?.role === "admin" ? (
                       <div
                         onClick={() => setSelectedId(element.id)}
                         className="Price group flex items-center gap-2 mt-4 cursor-pointer"
                       >
-                        <div>
-                          <Typography variant="h6">${element.price}</Typography>
-                        </div>
-                        {element.subscribe === "one_time" && (
-                          <p className="text-sm text-blue-500 font-medium flex items-center">
-                            One-Time (6-Month Access)
-                          </p>
+                        {element.price === 0 ? (
+                          <div>
+                            <Typography variant="h6">Free</Typography>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <Typography variant="h6">
+                                ${element.price}
+                              </Typography>
+                            </div>
+                            {element.subscribe === "one_time" && (
+                              <p className="text-sm text-blue-500 font-medium flex items-center">
+                                One-Time (6-Month Access)
+                              </p>
+                            )}
+                            {element.subscribe === "monthly" && (
+                              <p className="text-sm text-green-600 font-medium flex items-center">
+                                Monthly Subscription
+                              </p>
+                            )}
+                            {element.subscribe === "yearly" && (
+                              <p className="text-sm text-amber-600 font-medium flex items-center">
+                                Yearly Subscription
+                              </p>
+                            )}
+                          </>
                         )}
-                        {element.subscribe === "monthly" && (
-                          <p className="text-sm text-green-600 font-medium flex items-center">
-                            Monthly Subscription
-                          </p>
-                        )}
-                        {element.subscribe === "yearly" && (
-                          <p className="text-sm text-amber-600 font-medium flex items-center">
-                            Yearly Subscription
-                          </p>
-                        )}
+
                         <div
                           className={`hidden ${
                             element.id !== selectedId && "group-hover:flex"
@@ -405,23 +444,33 @@ const Main = () => {
                       </div>
                     ) : (
                       <div className="Price flex items-center gap-2 mt-4">
-                        <div>
-                          <Typography variant="h6">${element.price}</Typography>
-                        </div>
-                        {element.subscribe === "one_time" && (
-                          <p className="text-sm text-blue-500 font-medium flex items-center">
-                            One-Time (6-Month Access)
-                          </p>
-                        )}
-                        {element.subscribe === "monthly" && (
-                          <p className="text-sm text-green-600 font-medium flex items-center">
-                            Monthly Subscription
-                          </p>
-                        )}
-                        {element.subscribe === "yearly" && (
-                          <p className="text-sm text-amber-600 font-medium flex items-center">
-                            Yearly Subscription
-                          </p>
+                        {element.price === 0 ? (
+                          <div>
+                            <Typography variant="h6">Free</Typography>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <Typography variant="h6">
+                                ${element.price}
+                              </Typography>
+                            </div>
+                            {element.subscribe === "one_time" && (
+                              <p className="text-sm text-blue-500 font-medium flex items-center">
+                                One-Time (6-Month Access)
+                              </p>
+                            )}
+                            {element.subscribe === "monthly" && (
+                              <p className="text-sm text-green-600 font-medium flex items-center">
+                                Monthly Subscription
+                              </p>
+                            )}
+                            {element.subscribe === "yearly" && (
+                              <p className="text-sm text-amber-600 font-medium flex items-center">
+                                Yearly Subscription
+                              </p>
+                            )}
+                          </>
                         )}
                       </div>
                     )}

@@ -2,11 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import CommonMarkdown from "./CommonMarkdown";
 import JupyterNodebookFrame from "./JupyterNodebookFrame";
 import axios from "axios";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
+import RichTextEditor from "./RichTextEditor";
+import ContentsDrawer from "./ContentsDrawer";
 
-const Code = ({ lesson, user }) => {
+const Code = ({ lesson, user, isMobileScreen }) => {
   const [file, setFile] = useState(null);
+  const [post, setPost] = useState("");
   const [right, setRight] = useState(lesson?.right);
+  const [rightToggle, setRightToggle] = useState(true);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -33,36 +37,26 @@ const Code = ({ lesson, user }) => {
 
   const fileInputRef = useRef(null);
   const uploadRight = async () => {
-    const file = fileInputRef.current?.files[0];
-    if (!file) {
-      alert("Choose file");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
       const response = await axios.put(
         `http://localhost:8000/upload_right/${lesson.id}`,
-        formData, // send formData here
+        { right: post },
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
           withCredentials: true, // this stays in config
         }
       );
       setRight(response.data);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      setRightToggle(true);
     } catch (error) {
       console.log("Upload error:", error);
     }
   };
   return (
-    <div className="Code pl-6 pr-6 w-1/2 flex flex-col items-start">
+    <div
+      className={`Code pl-6 pr-6 ${
+        isMobileScreen ? "w-full" : "w-1/2"
+      } flex flex-col items-start`}
+    >
       {lesson?.rightType === false ? (
         <div
           className="CodeName flex py-[6px] px-[16px] items-center gap-2 self-stretch"
@@ -84,41 +78,44 @@ const Code = ({ lesson, user }) => {
           Code
         </div>
       )}
-      {user.role === "admin" && (
-        <div className="mt-4 w-full">
-          <Typography variant="h5">Upload Right</Typography>
-          <div className="w-full flex mt-3 justify-between items-center">
-            <input
-              type="file"
-              accept=".md,.html"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
-            <button
-              onClick={uploadRight}
-              style={{
-                padding: "8px",
-                width: 130,
-                fontFamily: "DMSans, sans-serif",
-                background: "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Upload & View
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="overflow-auto">
+
+      <div className="w-full">
         {/* I'm confused... */}
-        {lesson?.rightType === false ? (
-          <CommonMarkdown content={right} />
+        {user.role === "admin" ? (
+          rightToggle === false ? (
+            <div>
+              <RichTextEditor content={right} onChange={setPost} />
+              <button
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={uploadRight}
+              >
+                Submit
+              </button>
+            </div>
+          ) : (
+            <>
+              <div
+                className="raw-html  mt-4 break-words tracking-wide prose prose-h1:tracking-wider prose-strong:tracking-[1px]"
+                dangerouslySetInnerHTML={{ __html: right }}
+              />
+              <button
+                onClick={() => setRightToggle(false)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Edit
+              </button>
+            </>
+          )
         ) : (
-          <CommonMarkdown content={right} />
+          <div
+            className="raw-html mt-4 break-words tracking-wide prose prose-h1:tracking-wider prose-strong:tracking-[1px]"
+            // style={{ fontFamily: "DMSans, sans-serif" }}
+            dangerouslySetInnerHTML={{ __html: right }}
+          />
         )}
+        {/* {lesson?.rightType === false && ( */}
+
+        {/* )} */}
       </div>
     </div>
   );

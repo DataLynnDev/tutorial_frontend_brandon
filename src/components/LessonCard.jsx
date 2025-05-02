@@ -74,15 +74,15 @@ const LessonCard = ({ data, user }) => {
       </div>
 
       <div className="Description overflow-hidden text-overflow ellipsis line-clamp-3 mt-[6px]">
-        <Tooltip title={description} arrow>
-          <Typography
-            style={{ fontFamily: "DMSans, sans-serif" }}
-            variant="body1"
-            noWrap
-          >
-            {description}
-          </Typography>
-        </Tooltip>
+        {/* <Tooltip title={description} arrow> */}
+        <Typography
+          style={{ fontFamily: "DMSans, sans-serif" }}
+          variant="body1"
+          noWrap
+        >
+          {description}
+        </Typography>
+        {/* </Tooltip> */}
       </div>
 
       {/* <div className="flex pt-[6px]">

@@ -351,6 +351,7 @@ const Chapters = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [toggleUpdateChap]);
+  console.log(chapters);
   return (
     <div className="col-span-8 ml-10 mr-5">
       <div className="flex flex-col gap-6">
@@ -363,55 +364,78 @@ const Chapters = ({
           Chapter
         </Typography>
         <div className="flex flex-col">
-          {chaptersAlt?.map((chapter, chapterindex) =>
-            expanded === `panel${chapterindex}` ? (
-              <div key={chapterindex}>
-                <div className="flex flex-row py-6 pl-4 pr-[8px] gap-4">
-                  <Typography
-                    style={{
-                      fontFamily: "DMSans_Bold, sans-serif",
-                    }}
-                    sx={{ width: "1rem" }}
-                    variant={`h5`}
-                  >
-                    {chapterindex + 1}
-                  </Typography>
-                  <div ref={chapterUpdateRef} className="flex-1 flex flex-col">
-                    <div>
-                      {user.role === "admin" ? (
-                        toggleUpdateChap == false ? (
+          {chaptersAlt
+            ?.sort((a, b) => a.id - b.id)
+            .map((chapter, chapterindex) =>
+              expanded === `panel${chapterindex}` ? (
+                <div key={chapterindex}>
+                  <div className="flex flex-row py-6 pl-4 pr-[8px] gap-4">
+                    <Typography
+                      style={{
+                        fontFamily: "DMSans_Bold, sans-serif",
+                      }}
+                      sx={{ width: "1rem" }}
+                      variant={`h5`}
+                    >
+                      {chapterindex + 1}
+                    </Typography>
+                    <div
+                      ref={chapterUpdateRef}
+                      className="flex-1 flex flex-col"
+                    >
+                      <div>
+                        {user.role === "admin" ? (
+                          toggleUpdateChap == false ? (
+                            <Typography
+                              onClick={handleToggleUpdateChap}
+                              className="cursor-pointer"
+                              style={{ fontFamily: "DMSans_Bold, sans-serif" }}
+                              variant="h6"
+                            >
+                              {chapter.name}
+                            </Typography>
+                          ) : (
+                            <input
+                              value={newName}
+                              onChange={handleNewName}
+                              placeholder="change name"
+                              className="border border-black pl-3 py-2"
+                            />
+                          )
+                        ) : (
                           <Typography
-                            onClick={handleToggleUpdateChap}
-                            className="cursor-pointer"
                             style={{ fontFamily: "DMSans_Bold, sans-serif" }}
                             variant="h6"
                           >
                             {chapter.name}
                           </Typography>
-                        ) : (
-                          <input
-                            value={newName}
-                            onChange={handleNewName}
-                            placeholder="change name"
-                            className="border border-black pl-3 py-2"
-                          />
-                        )
-                      ) : (
-                        <Typography
-                          style={{ fontFamily: "DMSans_Bold, sans-serif" }}
-                          variant="h6"
-                        >
-                          {chapter.name}
-                        </Typography>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-[16px]">
-                      <div>
-                        {user.role === "admin" ? (
-                          toggleUpdateChap == false ? (
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-[16px]">
+                        <div>
+                          {user.role === "admin" ? (
+                            toggleUpdateChap == false ? (
+                              <Typography
+                                className="cursor-pointer"
+                                onClick={handleToggleUpdateChap}
+                                style={{
+                                  fontFamily: "DMSans, sans-serif",
+                                }}
+                                variant="body2"
+                                color="#00000099"
+                              >
+                                {chapter.description}
+                              </Typography>
+                            ) : (
+                              <input
+                                value={newDescription}
+                                onChange={handleNewDescription}
+                                placeholder="change description"
+                                className="border w-full border-black h-6 mt-3 text-xs pl-3"
+                              />
+                            )
+                          ) : (
                             <Typography
-                              className="cursor-pointer"
-                              onClick={handleToggleUpdateChap}
                               style={{
                                 fontFamily: "DMSans, sans-serif",
                               }}
@@ -420,462 +444,463 @@ const Chapters = ({
                             >
                               {chapter.description}
                             </Typography>
-                          ) : (
-                            <input
-                              value={newDescription}
-                              onChange={handleNewDescription}
-                              placeholder="change description"
-                              className="border w-full border-black h-6 mt-3 text-xs pl-3"
-                            />
-                          )
-                        ) : (
-                          <Typography
-                            style={{
-                              fontFamily: "DMSans, sans-serif",
-                            }}
-                            variant="body2"
-                            color="#00000099"
-                          >
-                            {chapter.description}
-                          </Typography>
-                        )}
-                      </div>
+                          )}
+                        </div>
 
-                      <List sx={{ paddingY: "8px" }}>
-                        {chapter.lessons.length > 0 ? (
-                          chapter.lessons.map((lesson, index) => {
-                            if (Array.isArray(completed)) {
-                              const progress =
-                                completed.find(
-                                  (item) => item.lesson_id === lesson.id
-                                ) || null;
+                        <List sx={{ paddingY: "8px" }}>
+                          {chapter.lessons.length > 0 ? (
+                            chapter.lessons
+                              ?.sort((a, b) => a.id - b.id)
+                              .map((lesson, index) => {
+                                if (Array.isArray(completed)) {
+                                  const progress =
+                                    completed.find(
+                                      (item) => item.lesson_id === lesson.id
+                                    ) || null;
 
-                              const lessonIndex = totalLesson.findIndex(
-                                (l) => l.id === lesson.id
-                              );
-                              const isDisabled =
-                                user.role !== "admin" &&
-                                detail.saved === false &&
-                                lessonIndex >= 2;
-
-                              return (
-                                <div
-                                  className="flex items-center group"
-                                  key={index}
-                                >
-                                  <ListItem
-                                    key={`lesson-${lesson.id}`}
-                                    disablePadding
-                                    className={`flex flex-col ${
-                                      isDisabled ? "cursor-not-allowed" : ""
-                                    }`}
-                                    sx={{
-                                      "&:not(:last-child)": {
-                                        mb: "6px",
-                                      },
-                                    }}
-                                  >
-                                    <ListItemButton
-                                      className="w-full"
-                                      disabled={isDisabled} // Disables lessons beyond the first two
-                                      onClick={() =>
-                                        !isDisabled &&
-                                        navigate(`/lesson/${lesson.id}`, {
-                                          state: {
-                                            lesson,
-                                            chapters,
-                                            tutorial,
-                                            user,
-                                            chapter,
-                                            detail,
-                                            chapterindex,
-                                            chaptersAlt,
-                                          },
-                                        })
-                                      }
+                                  const lessonIndex = totalLesson
+                                    .sort((a, b) => a.id - b.id)
+                                    .findIndex((l) => l.id === lesson.id);
+                                  const isDisabled =
+                                    user.role !== "admin" &&
+                                    detail.saved === false &&
+                                    lessonIndex >= 2;
+                                  return (
+                                    <div
+                                      className="flex items-center group"
+                                      key={index}
                                     >
-                                      {user.role === "admin"
-                                        ? ""
-                                        : !isDisabled &&
-                                          (progress ? (
-                                            <CheckCircle color="success" />
-                                          ) : (
-                                            <PlayCircleOutline color="action" />
-                                          ))}
-
-                                      <div className="w-full group flex items-center justify-between">
-                                        <Typography
-                                          style={{
-                                            fontFamily: "DMSans, sans-serif",
-                                            marginLeft: 13,
-                                          }}
-                                        >
-                                          {lesson.title}
-                                        </Typography>
-                                      </div>
-                                    </ListItemButton>
-                                    <Divider className="w-full" />
-                                  </ListItem>
-                                  {user.role === "admin" && (
-                                    <div className="hidden px-3 group-hover:flex ml-1 rounded-full">
-                                      <Clear
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                          deleteLesson(lesson.id, chapter.id)
-                                        }
-                                        style={{ fontSize: 14 }}
-                                      />
-                                    </div>
-                                  )}
-
-                                  <div className="flex ml-3">
-                                    {isDisabled && (
-                                      <>
-                                        {detail?.saved === false ? (
-                                          tutorial.subscribe === "one_time" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  saveTutorial(tutorialId);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Purchase to unlock
-                                              </div>
-                                            </div>
-                                          ) : tutorial.subscribe ===
-                                            "monthly" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeTutorial(tutorialId);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Subscribe to unlock
-                                              </div>
-                                            </div>
-                                          ) : tutorial.subscribe ===
-                                            "yearly" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeYearlyTutorial(
-                                                    tutorialId
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Subscribe to unlock
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            ""
-                                          )
-                                        ) : (
-                                          ""
-                                        )}
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            } else {
-                              const lessonIndex = totalLesson.findIndex(
-                                (l) => l.id === lesson.id
-                              );
-                              const isDisabled =
-                                user.role !== "admin" &&
-                                detail.saved === false &&
-                                lessonIndex >= 2;
-                              return (
-                                <div
-                                  className="flex items-center group"
-                                  key={index}
-                                >
-                                  <ListItem
-                                    key={`lesson-${lesson.id}`}
-                                    disablePadding
-                                    className={`flex flex-col ${
-                                      isDisabled ? "cursor-not-allowed" : ""
-                                    }`}
-                                    sx={{
-                                      "&:not(:last-child)": {
-                                        mb: "6px",
-                                      },
-                                    }}
-                                  >
-                                    <ListItemButton
-                                      className="w-full"
-                                      // Disables lessons beyond the first two
-                                      disabled={isDisabled}
-                                      onClick={() =>
-                                        !isDisabled &&
-                                        navigate(`/lesson/${lesson.id}`, {
-                                          state: {
-                                            lesson,
-                                            chapters,
-                                            tutorial,
-                                            user,
-                                            chapter,
-                                            detail,
-                                            chapterindex,
-                                            chaptersAlt,
+                                      <ListItem
+                                        key={`lesson-${lesson.id}`}
+                                        disablePadding
+                                        className={`flex flex-col ${
+                                          isDisabled ? "cursor-not-allowed" : ""
+                                        }`}
+                                        sx={{
+                                          "&:not(:last-child)": {
+                                            mb: "6px",
                                           },
-                                        })
-                                      }
-                                    >
-                                      {user.role === "admin"
-                                        ? ""
-                                        : !isDisabled &&
-                                          (lesson.completed ? (
-                                            <CheckCircle color="success" />
-                                          ) : (
-                                            <PlayCircleOutline color="action" />
-                                          ))}
-
-                                      <div className="w-full group flex items-center justify-between">
-                                        <Typography
-                                          style={{
-                                            fontFamily: "DMSans, sans-serif",
-                                            marginLeft: 13,
-                                          }}
+                                        }}
+                                      >
+                                        <ListItemButton
+                                          className="w-full"
+                                          disabled={isDisabled} // Disables lessons beyond the first two
+                                          onClick={() =>
+                                            !isDisabled &&
+                                            navigate(`/lesson/${lesson.id}`, {
+                                              state: {
+                                                lesson,
+                                                chapters,
+                                                tutorial,
+                                                user,
+                                                chapter,
+                                                detail,
+                                                chapterindex,
+                                                chaptersAlt,
+                                              },
+                                            })
+                                          }
                                         >
-                                          {lesson.title}
-                                        </Typography>
-                                      </div>
-                                    </ListItemButton>
+                                          {user.role === "admin"
+                                            ? ""
+                                            : !isDisabled &&
+                                              (progress ? (
+                                                <CheckCircle color="success" />
+                                              ) : (
+                                                <PlayCircleOutline color="action" />
+                                              ))}
 
-                                    <Divider className="w-full" />
-                                  </ListItem>
-                                  {user.role === "admin" && (
-                                    <div className="hidden px-2 items-center ml-2 group-hover:flex gap-4 rounded-full">
-                                      <input
-                                        value={lessonName}
-                                        onChange={handleLessonName}
-                                        placeholder="edit lesson"
-                                        className="border p-1 pl-2  border-black"
-                                      />
-                                      <div
-                                        className={`${
-                                          toggleRightType === false
-                                            ? "bg-blue-400"
-                                            : "bg-yellow-300"
-                                        } p-1 rounded-3xl cursor-pointer`}
-                                        onClick={handleRightType}
-                                      >
-                                        {toggleRightType === false
-                                          ? "md"
-                                          : "code"}
-                                      </div>
-                                      <button
-                                        onClick={() => updateLesson(lesson.id)}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                                        type="submit"
-                                      >
-                                        Submit
-                                      </button>
-                                      <Clear
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                          deleteLesson(lesson.id, chapter.id)
-                                        }
-                                        style={{ fontSize: 14 }}
-                                      />
-                                    </div>
-                                  )}
-                                  <div className="flex ml-3">
-                                    {isDisabled && (
-                                      <>
-                                        {detail?.saved === false ? (
-                                          tutorial.subscribe === "one_time" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  saveTutorial(tutorialId);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Purchase to unlock
-                                              </div>
-                                            </div>
-                                          ) : tutorial.subscribe ===
-                                            "monthly" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeTutorial(tutorialId);
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Subscribe to unlock
-                                              </div>
-                                            </div>
-                                          ) : tutorial.subscribe ===
-                                            "yearly" ? (
-                                            <div className="icon-container">
-                                              <LockFilled
-                                                onClick={() => {
-                                                  subscribeYearlyTutorial(
-                                                    tutorialId
-                                                  );
-                                                }}
-                                                className="justify-center text-[#9E9E9E] cursor-pointer"
-                                              />
-                                              <div className="tooltip">
-                                                Subscribe to unlock
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            ""
-                                          )
-                                        ) : (
-                                          ""
+                                          <div className="w-full group flex items-center justify-between">
+                                            <Typography
+                                              style={{
+                                                fontFamily:
+                                                  "DMSans, sans-serif",
+                                                marginLeft: 13,
+                                              }}
+                                            >
+                                              {lesson.title}
+                                            </Typography>
+                                          </div>
+                                        </ListItemButton>
+                                        <Divider className="w-full" />
+                                      </ListItem>
+                                      {user.role === "admin" && (
+                                        <div className="hidden px-3 group-hover:flex ml-1 rounded-full">
+                                          <Clear
+                                            className="cursor-pointer"
+                                            onClick={() =>
+                                              deleteLesson(
+                                                lesson.id,
+                                                chapter.id
+                                              )
+                                            }
+                                            style={{ fontSize: 14 }}
+                                          />
+                                        </div>
+                                      )}
+
+                                      <div className="flex ml-3">
+                                        {isDisabled && (
+                                          <>
+                                            {detail?.saved === false ? (
+                                              tutorial.subscribe ===
+                                              "one_time" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      saveTutorial(tutorialId);
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Purchase to unlock
+                                                  </div>
+                                                </div>
+                                              ) : tutorial.subscribe ===
+                                                "monthly" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeTutorial(
+                                                        tutorialId
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Subscribe to unlock
+                                                  </div>
+                                                </div>
+                                              ) : tutorial.subscribe ===
+                                                "yearly" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeYearlyTutorial(
+                                                        tutorialId
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Subscribe to unlock
+                                                  </div>
+                                                </div>
+                                              ) : (
+                                                ""
+                                              )
+                                            ) : (
+                                              ""
+                                            )}
+                                          </>
                                         )}
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            }
-                          })
-                        ) : (
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <ListItemIcon>
-                                <PlayCircleOutline
-                                  style={{ color: "#0000008F" }}
-                                />
-                              </ListItemIcon>
-                              <Typography
-                                style={{
-                                  fontFamily: "DMSans, sans-serif",
-                                }}
-                              >
-                                Coming Soon...
-                              </Typography>
-                            </ListItemButton>
-                          </ListItem>
-                        )}
-                      </List>
-                      {/* add lesson */}
-                      <div className="flex justify-center">
-                        {user.role === "admin" &&
-                          (toggleLesson === false ? (
-                            <PlusOutlined
-                              className="ml-2"
-                              onClick={handleToggleLesson}
-                            />
+                                      </div>
+                                    </div>
+                                  );
+                                } else {
+                                  const lessonIndex = totalLesson.findIndex(
+                                    (l) => l.id === lesson.id
+                                  );
+                                  const isDisabled =
+                                    user.role !== "admin" &&
+                                    detail.saved === false &&
+                                    lessonIndex >= 2;
+
+                                  return (
+                                    <div
+                                      className="flex items-center group"
+                                      key={index}
+                                    >
+                                      <ListItem
+                                        key={`lesson-${lesson.id}`}
+                                        disablePadding
+                                        className={`flex flex-col ${
+                                          isDisabled ? "cursor-not-allowed" : ""
+                                        }`}
+                                        sx={{
+                                          "&:not(:last-child)": {
+                                            mb: "6px",
+                                          },
+                                        }}
+                                      >
+                                        <ListItemButton
+                                          className="w-full"
+                                          // Disables lessons beyond the first two
+                                          disabled={isDisabled}
+                                          onClick={() =>
+                                            !isDisabled &&
+                                            navigate(`/lesson/${lesson.id}`, {
+                                              state: {
+                                                lesson,
+                                                chapters,
+                                                tutorial,
+                                                user,
+                                                chapter,
+                                                detail,
+                                                chapterindex,
+                                                chaptersAlt,
+                                              },
+                                            })
+                                          }
+                                        >
+                                          {user.role === "admin"
+                                            ? ""
+                                            : !isDisabled &&
+                                              (lesson.completed ? (
+                                                <CheckCircle color="success" />
+                                              ) : (
+                                                <PlayCircleOutline color="action" />
+                                              ))}
+
+                                          <div className="w-full group flex items-center justify-between">
+                                            <Typography
+                                              style={{
+                                                fontFamily:
+                                                  "DMSans, sans-serif",
+                                                marginLeft: 13,
+                                              }}
+                                            >
+                                              {lesson.title}
+                                            </Typography>
+                                          </div>
+                                        </ListItemButton>
+
+                                        <Divider className="w-full" />
+                                      </ListItem>
+                                      {user.role === "admin" && (
+                                        <div className="hidden px-2 items-center ml-2 group-hover:flex gap-4 rounded-full">
+                                          <input
+                                            value={lessonName}
+                                            onChange={handleLessonName}
+                                            placeholder="edit lesson"
+                                            className="border p-1 pl-2  border-black"
+                                          />
+                                          <div
+                                            className={`${
+                                              toggleRightType === false
+                                                ? "bg-blue-400"
+                                                : "bg-yellow-300"
+                                            } p-1 rounded-3xl cursor-pointer`}
+                                            onClick={handleRightType}
+                                          >
+                                            {toggleRightType === false
+                                              ? "md"
+                                              : "code"}
+                                          </div>
+                                          <button
+                                            onClick={() =>
+                                              updateLesson(lesson.id)
+                                            }
+                                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                            type="submit"
+                                          >
+                                            Submit
+                                          </button>
+                                          <Clear
+                                            className="cursor-pointer"
+                                            onClick={() =>
+                                              deleteLesson(
+                                                lesson.id,
+                                                chapter.id
+                                              )
+                                            }
+                                            style={{ fontSize: 14 }}
+                                          />
+                                        </div>
+                                      )}
+                                      <div className="flex ml-3">
+                                        {isDisabled && (
+                                          <>
+                                            {detail?.saved === false ? (
+                                              tutorial.subscribe ===
+                                              "one_time" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      saveTutorial(tutorialId);
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Purchase to unlock
+                                                  </div>
+                                                </div>
+                                              ) : tutorial.subscribe ===
+                                                "monthly" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeTutorial(
+                                                        tutorialId
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Subscribe to unlock
+                                                  </div>
+                                                </div>
+                                              ) : tutorial.subscribe ===
+                                                "yearly" ? (
+                                                <div className="icon-container">
+                                                  <LockFilled
+                                                    onClick={() => {
+                                                      subscribeYearlyTutorial(
+                                                        tutorialId
+                                                      );
+                                                    }}
+                                                    className="justify-center text-[#9E9E9E] cursor-pointer"
+                                                  />
+                                                  <div className="tooltip">
+                                                    Subscribe to unlock
+                                                  </div>
+                                                </div>
+                                              ) : (
+                                                ""
+                                              )
+                                            ) : (
+                                              ""
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              })
                           ) : (
-                            <div
-                              ref={lessonRef}
-                              className="gap-6 flex items-center justify-center"
-                            >
-                              <input
-                                value={title}
-                                onChange={handleTitle}
-                                placeholder="add title"
-                                className="border-black border py-2 px-3"
+                            <ListItem disablePadding>
+                              <ListItemButton>
+                                <ListItemIcon>
+                                  <PlayCircleOutline
+                                    style={{ color: "#0000008F" }}
+                                  />
+                                </ListItemIcon>
+                                <Typography
+                                  style={{
+                                    fontFamily: "DMSans, sans-serif",
+                                  }}
+                                >
+                                  Coming Soon...
+                                </Typography>
+                              </ListItemButton>
+                            </ListItem>
+                          )}
+                        </List>
+                        {/* add lesson */}
+                        <div className="flex justify-center">
+                          {user.role === "admin" &&
+                            (toggleLesson === false ? (
+                              <PlusOutlined
+                                className="ml-2"
+                                onClick={handleToggleLesson}
                               />
-
-                              <Button
-                                style={{
-                                  backgroundColor: "#E2E2E2",
-                                  width: 120,
-                                  padding: 10,
-                                  borderRadius: 14,
-                                }}
-                                type="button"
-                                onClick={handleMd}
+                            ) : (
+                              <div
+                                ref={lessonRef}
+                                className="gap-6 flex items-center justify-center"
                               >
-                                SWITCH TYPE
-                              </Button>
+                                <input
+                                  value={title}
+                                  onChange={handleTitle}
+                                  placeholder="add title"
+                                  className="border-black border py-2 px-3"
+                                />
 
-                              {rightType === false ? "md" : "code"}
+                                <Button
+                                  style={{
+                                    backgroundColor: "#E2E2E2",
+                                    width: 120,
+                                    padding: 10,
+                                    borderRadius: 14,
+                                  }}
+                                  type="button"
+                                  onClick={handleMd}
+                                >
+                                  SWITCH TYPE
+                                </Button>
 
-                              <Button
-                                style={{
-                                  backgroundColor: "#E2E2E2",
-                                  padding: 10,
-                                  borderRadius: 14,
-                                }}
-                                type="submit"
-                                onClick={() => addLesson(chapter.id)}
-                              >
-                                Submit
-                              </Button>
-                            </div>
-                          ))}
+                                {rightType === false ? "md" : "code"}
+
+                                <Button
+                                  style={{
+                                    backgroundColor: "#E2E2E2",
+                                    padding: 10,
+                                    borderRadius: 14,
+                                  }}
+                                  type="submit"
+                                  onClick={() => addLesson(chapter.id)}
+                                >
+                                  Submit
+                                </Button>
+                              </div>
+                            ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {user.role === "admin" && (
-                    <div className="h-11 items-center flex gap-3">
-                      {toggleUpdateChap === true && (
-                        <button onClick={() => updateChapter(chapter.id)}>
-                          submit
-                        </button>
-                      )}
-                      <Clear
-                        onClick={() => {
-                          deleteChapter(chapter.id), setToggleUpdateChap(false);
-                        }}
-                      />
-                    </div>
-                  )}
+                    {user.role === "admin" && (
+                      <div className="h-11 items-center flex gap-3">
+                        {toggleUpdateChap === true && (
+                          <button onClick={() => updateChapter(chapter.id)}>
+                            submit
+                          </button>
+                        )}
+                        <Clear
+                          onClick={() => {
+                            deleteChapter(chapter.id),
+                              setToggleUpdateChap(false);
+                          }}
+                        />
+                      </div>
+                    )}
 
-                  <KeyboardArrowDown
-                    className="cursor-pointer mr-2"
-                    onClick={() => {
-                      setExpanded(
-                        expanded === `panel${chapterindex}`
-                          ? ""
-                          : `panel${chapterindex}`
-                      ),
-                        setToggleLesson(false);
-                    }}
-                    style={{ color: "#0000008f" }}
-                  />
+                    <KeyboardArrowDown
+                      className="cursor-pointer mr-2"
+                      onClick={() => {
+                        setExpanded(
+                          expanded === `panel${chapterindex}`
+                            ? ""
+                            : `panel${chapterindex}`
+                        ),
+                          setToggleLesson(false);
+                      }}
+                      style={{ color: "#0000008f" }}
+                    />
+                  </div>
+                  <Divider />
                 </div>
-                <Divider />
-              </div>
-            ) : (
-              <div key={chapterindex}>
-                <div className="flex flex-row py-6 px-4 gap-4 hover:bg-[#0000000A]">
-                  <Typography
-                    style={{
-                      fontFamily: "DMSans_Bold, sans-serif",
-                    }}
-                    sx={{ width: "1rem" }}
-                    variant="h5"
-                  >
-                    {chapterindex + 1}
-                  </Typography>
-                  <div className="flex-1 flex flex-col">
+              ) : (
+                <div key={chapterindex}>
+                  <div className="flex flex-row py-6 px-4 gap-4 hover:bg-[#0000000A]">
                     <Typography
                       style={{
                         fontFamily: "DMSans_Bold, sans-serif",
                       }}
-                      variant="h6"
+                      sx={{ width: "1rem" }}
+                      variant="h5"
                     >
-                      {chapter.name}
+                      {chapterindex + 1}
                     </Typography>
+                    <div className="flex-1 flex flex-col">
+                      <Typography
+                        style={{
+                          fontFamily: "DMSans_Bold, sans-serif",
+                        }}
+                        variant="h6"
+                      >
+                        {chapter.name}
+                      </Typography>
+                    </div>
+                    <KeyboardArrowRight
+                      onClick={() => setExpanded(`panel${chapterindex}`)}
+                      className="cursor-pointer"
+                      style={{ color: "#0000008F" }}
+                    />
                   </div>
-                  <KeyboardArrowRight
-                    onClick={() => setExpanded(`panel${chapterindex}`)}
-                    className="cursor-pointer"
-                    style={{ color: "#0000008F" }}
-                  />
+                  <Divider />
                 </div>
-                <Divider />
-              </div>
-            )
-          )}
+              )
+            )}
           {/* <PlusOutlined style={{ fontSize: 21 }} /> */}
           <div className="flex justify-center">
             {user.role === "admin" &&

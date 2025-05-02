@@ -9,6 +9,7 @@ import {
   PlusOutlined,
   XOutlined,
 } from "@ant-design/icons";
+import RichTextEditor from "./RichTextEditor";
 
 const TextBook = ({ lesson, user }) => {
   const [file, setFile] = useState(null);
@@ -281,32 +282,20 @@ const TextBook = ({ lesson, user }) => {
   }, [lesson.id]);
 
   const fileInputRef = useRef(null);
+  const [leftToggle, setLeftToggle] = useState(true);
+  const [post, setPost] = useState("");
 
   const uploadLeft = async () => {
-    const file = fileInputRef.current?.files[0];
-    if (!file) {
-      alert("Choose file");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
       const response = await axios.put(
         `http://localhost:8000/upload_left/${lesson.id}`,
-        formData,
+        { left: post },
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
           withCredentials: true,
         }
       );
       setLeft(response.data);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      setLeftToggle(true);
     } catch (error) {
       console.log("Upload error:", error);
     }
@@ -527,36 +516,39 @@ const TextBook = ({ lesson, user }) => {
         </div>
       </div>
 
-      {user.role === "admin" && lesson.rightType === true && (
-        <div className="mt-4">
-          <Typography variant="h5">Upload Left</Typography>
-          <div className="w-full flex mt-3 justify-between items-center">
-            <input
-              type="file"
-              accept=".md,.html"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
-            <button
-              onClick={uploadLeft}
-              style={{
-                padding: "8px 16px",
-                fontFamily: "DMSans, sans-serif",
-                background: "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Upload & View
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="Sessions flex flex-col items-start self-stretch">
-        <CommonMarkdown content={left} />
+      <div className="w-full">
+        {user.role === "admin" ? (
+          lesson.rightType === true &&
+          (leftToggle === false ? (
+            <div className="mt-4">
+              <RichTextEditor content={left} onChange={setPost} />
+              <button
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={uploadLeft}
+              >
+                Submit
+              </button>
+            </div>
+          ) : (
+            <>
+              <div
+                className="raw-html mt-4 break-words tracking-wide prose prose-h1:tracking-wider prose-strong:tracking-[1px]"
+                dangerouslySetInnerHTML={{ __html: left }}
+              />
+              <button
+                onClick={() => setLeftToggle(false)}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Edit
+              </button>
+            </>
+          ))
+        ) : (
+          <div
+            className="raw-html mt-4 break-words tracking-wide prose prose-h1:tracking-wider prose-strong:tracking-[1px]"
+            dangerouslySetInnerHTML={{ __html: left }}
+          />
+        )}
       </div>
     </div>
   );

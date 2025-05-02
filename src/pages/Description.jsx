@@ -12,6 +12,7 @@ const Description = ({
   complete,
   handleEnd,
   video,
+  isMobileScreen,
   user,
   handleFileChange,
   handleUpload,
@@ -59,7 +60,7 @@ const Description = ({
   };
   return (
     <div
-      style={{ width: "50%" }}
+      style={{ width: isMobileScreen ? "100%" : "50%" }}
       className="Description pl-6 pr-6 flex flex-col items-start gap-[16px] self-stretch flex-grow overflow-auto"
     >
       {video && (
@@ -79,6 +80,7 @@ const Description = ({
             accept="video/*"
             ref={fileInputRef}
             onChange={handleFileChange}
+            className="w-60"
           />
 
           <div>
